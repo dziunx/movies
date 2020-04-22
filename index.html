@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Wyszukiwarka filmów</title>
+  </head>
+  <body>
+    <div class="searchbox">
+      <form>
+        <input type="text" id="userInput" placeholder="Search" />
+        <div>
+          <input type="submit" value="Search" />
+        </div>
+      </form>
+    </div>
+
+    <div id="container" style="width:30%; display:inline-block"></div>
+    <div
+      id="movieinfo"
+      style="width:69%; display:inline-block; vertical-align: top;"
+    ></div>
+
+    <script>
+      var user = {
+        apikey: "7cc17abb",
+        url: "http://www.omdbapi.com/?apikey="
+      };
+
+      function getInput(evt) {
+        evt.preventDefault();
+        const $userInput = document.getElementById("userInput");
+        const userInput = $userInput.value;
+        var url_link = user.url + user.apikey + "&s=" + userInput;
+
+        fetch(url_link)
+          .then(response => {
+            return response.json();
+          })
+          .then(data => {
+            const container = document.getElementById("container");
+            container.innerHTML = "";
+            document.getElementById("movieinfo").innerHTML = "";
+
+            let movies = data.Search;
+            movies.forEach(movie => {
+              const card = document.createElement("div");
+              card.setAttribute("class", "card");
+
+              var imdb = user.url + user.apikey + "&i=" + movie.imdbID;
+
+              const title = document.createElement("h1");
+              title.setAttribute("id", imdb);
+
+              title.textContent = movie.Title;
+
+              container.append(card);
+              card.appendChild(title);
+            });
+
+            var getMovieDetails = function() {
+              document.onclick = function(e) {
+                if (e.target.tagName == "H1") {
+                  var movie_url = e.target.getAttribute("id");
+
+                  fetch(movie_url)
+                    .then(response => {
+                      return response.json();
+                    })
+                    .then(data => {
+                      const movieinfo = document.getElementById("movieinfo");
+                      movieinfo.innerHTML = "";
+
+                      let poster = document.createElement("img");
+                      poster.setAttribute("src", data.Poster);
+
+                      const year = document.createElement("h2");
+                      year.textContent = data.Year;
+
+                      const plot = document.createElement("h2");
+                      plot.textContent = data.Plot;
+                      movieinfo.appendChild(plot);
+                      movieinfo.appendChild(year);
+                      movieinfo.appendChild(poster);
+                    });
+                }
+              };
+            };
+
+            getMovieDetails();
+          });
+      }
+
+      const $form = document.querySelector(".searchbox form");
+      $form.addEventListener("submit", getInput);
+    </script>
+  </body>
+</html>
